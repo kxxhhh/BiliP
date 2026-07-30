@@ -24,26 +24,15 @@ jobs:
       - name: 授予 Gradle 执行权限
         run: chmod +x gradlew
 
-      # 编译 Kotlin 生成 class 文件（脚本需要）
       - name: 编译项目（生成插件所需的 class 文件）
         run: ./gradlew :app:compileDebugKotlin --no-daemon --no-watch-fs
 
       - name: 赋予打包脚本执行权限
         run: chmod +x package-emoji-bomb-plugin.sh
 
-      # 关键：先切换到项目根目录（$GITHUB_WORKSPACE），再执行脚本
       - name: 执行打包（方案一）
-        run: |
-          cd $GITHUB_WORKSPACE
-          ./package-emoji-bomb-plugin.sh
+        run: cd $GITHUB_WORKSPACE && ./package-emoji-bomb-plugin.sh
 
-      - name: 上传 .bpplugin 包
-        uses: actions/upload-artifact@v4
-        with:
-          name: emoji-bomb-plugin
-          path: build/distributions/*.bpplugin        run: ./package-emoji-bomb-plugin.sh
-
-      # 上传产物
       - name: 上传 .bpplugin 包
         uses: actions/upload-artifact@v4
         with:
