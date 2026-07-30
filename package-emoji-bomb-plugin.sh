@@ -1,40 +1,60 @@
 #!/bin/bash
 set -e
 
-# === 固定配置（基于你的绝对路径） ===
-PROJECT_ROOT="/workspaces/BiliP"
 PLUGIN_NAME="emoji-bomb-plugin"
 PLUGIN_VERSION="1.0.0"
-OUTPUT_DIR="$PROJECT_ROOT/build/distributions"
-PLUGIN_PACKAGE="com/android/purebilibili/feature/plugin"
-PLUGIN_ENTRY_CLASS="EmojiBombPlugin"
+OUTPUT_DIR="build/distributions"
+PACK_DIR="build/plugin_pack"   # 永久打包目录
 
 echo "🎭 开始打包随机表情包炸弹插件..."
 
-# 1. 准备输出目录
+# 创建输出目录
 mkdir -p "$OUTPUT_DIR"
 
-# 2. 创建临时打包目录
-TEMP_DIR=$(mktemp -d)
-echo "📁 临时目录: $TEMP_DIR"
+# 清理并重新创建永久打包目录（确保每次都是干净的）
+rm -rf "$PACK_DIR"
+mkdir -p "$PACK_DIR"
 
-# 3. 创建插件 manifest
-cat > "$TEMP_DIR/plugin-manifest.json" << EOF
+echo "📁 使用永久打包目录: $PACK_DIR"
+
+# 复制插件manifest
+cat > "$PACK_DIR/plugin-manifest.json" << EOF
 {
   "pluginId": "com.bilipai.emoji-bomb",
   "displayName": "随机表情包炸弹",
   "version": "$PLUGIN_VERSION",
   "apiVersion": 1,
   "entryClassName": "com.android.purebilibili.feature.plugin.EmojiBombPlugin",
-  "capabilities": ["PLAYER_STATE", "PLUGIN_STORAGE"],
+  "capabilities": [
+    "PLAYER_STATE",
+    "PLUGIN_STORAGE"
+  ],
   "description": "随机在视频播放时弹出搞怪表情包，配以搞笑音效，制造欢乐惊喜",
   "author": "BiliPai",
   "minAppVersion": "9.9.9.1"
 }
 EOF
-echo "📋 已创建 manifest"
 
-# 4. 复制编译后的插件类文件（保持完整包路径）
+echo "📋 创建插件manifest..."
+
+# 复制编译后的类文件
+if [ -d "app/build/intermediates/javac/debug/classes" ]; then
+    echo "📦 复制编译后的类文件..."
+    mkdir -p "$PACK_DIR/com/android/purebilibili/feature/plugin"
+    cp -r "app/build/intermediates/javac/debug/classes/com/android/purebilibili/feature/plugin/"* "$PACK_DIR/com/android/purebilibili/feature/plugin/"
+else
+    echo "⚠️ 未找到类文件，请先编译项目"
+    exit 1
+fi
+
+# 打包为ZIP格式（.bpplugin）
+cd "$PACK_DIR"
+zip -r "../$OUTPUT_DIR/${PLUGIN_NAME}-${PLUGIN_VERSION}.bpplugin" .
+cd - > /dev/null
+
+echo "✅ 插件打包完成!"
+echo "📦 输出文件: $OUTPUT_DIR/${PLUGIN_NAME}-${PLUGIN_VERSION}.bpplugin"
+echo "📁 中间文件保留在: $PACK_DIR （可手动检查）"# 4. 复制编译后的插件类文件（保持完整包路径）
 SOURCE_CLASSES_DIR="$PROJECT_ROOT/app/build/intermediates/javac/debug/classes"
 if [ ! -d "$SOURCE_CLASSES_DIR" ]; then
     echo "❌ 错误: 未找到编译输出目录，请先编译项目 (./gradlew assembleDebug)"
