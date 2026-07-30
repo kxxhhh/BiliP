@@ -51,6 +51,8 @@ import com.android.purebilibili.feature.plugin.HomeFeedAnonymizerPlugin
 import com.android.purebilibili.feature.plugin.SponsorBlockPlugin
 import com.android.purebilibili.feature.plugin.dlna.DlnaCastPlugin
 import com.android.purebilibili.feature.plugin.googlecast.GoogleCastPlugin
+import com.android.purebilibili.feature.plugin.ReversePrankPlugin
+import com.android.purebilibili.feature.plugin.EmojiBombPlugin
 import com.android.purebilibili.feature.plugin.TodayWatchPlugin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -227,12 +229,14 @@ class PureApplication : Application(), ImageLoaderFactory, ComponentCallbacks2 {
         PluginManager.register(Anime4KPlugin())
         PluginManager.register(DanmakuEnhancePlugin())
         PluginManager.register(EyeProtectionPlugin())
+        PluginManager.register(ReversePrankPlugin())
+        PluginManager.register(EmojiBombPlugin())
         PluginManager.register(TodayWatchPlugin())
         PluginManager.register(CdnRegionPlugin())
         PluginManager.register(HomeFeedAnonymizerPlugin())
         PluginManager.register(DlnaCastPlugin())
         PluginManager.register(GoogleCastPlugin())
-        Logger.d(PureApplicationRuntimeConfig.TAG, " Plugin system initialized with 10 built-in plugins")
+        Logger.d(PureApplicationRuntimeConfig.TAG, " Plugin system initialized with 12 built-in plugins")
 
         com.android.purebilibili.core.plugin.json.JsonPluginManager.initialize(this)
         Logger.d(PureApplicationRuntimeConfig.TAG, " JSON plugin system initialized")

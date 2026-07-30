@@ -17,21 +17,31 @@ class TopTabRefractionPolicyTest {
         assertTrue(source.contains("shouldUseMovingIosCapsule"))
         assertTrue(source.contains("shouldUseLiquidGlassIndicator"))
         assertFalse(source.contains("shouldForceDragLiquidGlassIndicator"))
-        assertTrue(source.contains("KernelSuBottomBarIndicatorLayer("))
+        assertTrue(source.contains("BottomBarMatchedLiquidIndicator("))
         assertFalse(source.contains("BottomBarLiquidIndicatorSurface("))
         assertTrue(source.contains("resolveBottomBarRefractionMotionProfile("))
         assertTrue(source.contains("resolveBottomBarBackdropPresetIndicatorLens("))
         assertTrue(source.contains("topTabShouldStretchIndicator"))
         assertTrue(source.contains("val shouldPrimeTopTabLiquidGlassCapture ="))
         assertTrue(source.contains("val topTabContentBackdrop = rememberLayerBackdrop()"))
-        assertTrue(source.contains("val effectiveTopTabIndicatorContentBackdrop: Backdrop?"))
-        assertTrue(source.contains("rememberCombinedBackdrop(backdrop, topTabContentBackdrop)"))
-        assertTrue(source.contains("contentBackdrop = topTabContentBackdrop"))
-        assertTrue(source.contains("backdrop = effectiveTopTabIndicatorContentBackdrop ?: backdrop"))
-        assertTrue(source.contains("val glassLayersAlwaysOn = shouldUseLiquidGlassIndicator"))
+        assertTrue(source.contains("val topTabIndicatorMiuixBackdrop"))
+        assertFalse(source.contains("rememberCombinedBackdrop(backdrop, topTabContentBackdrop)"))
+        assertTrue(source.contains("rememberMiuixCombinedBackdrop(miuixBackdrop, topTabMiuixContentBackdrop)"))
+        assertTrue(source.contains("contentBackdrop = effectiveTopTabMiuixContentBackdrop"))
+        assertTrue(source.contains("backdrop = topTabIndicatorMiuixBackdrop"))
+        assertTrue(source.contains("legacyContentBackdrop = topTabContentBackdrop"))
         assertTrue(source.contains("resolveTopTabIndicatorBackdropPolicy("))
         assertTrue(source.contains("isDragging = topTabShouldStretchIndicator"))
         assertTrue(source.contains("indicatorLayerScaleProgress = topTabIndicatorLayerScaleProgress"))
+        assertTrue(source.contains("val topTabLensProgress = topTabIndicatorLayerScaleProgress"))
+        assertTrue(source.contains("val topTabCaptureLensProgress = if (shouldUseLiquidGlassIndicator) 1f else 0f"))
+        assertFalse(source.contains(".bottomBarMatchedCaptureOverflow("))
+        assertTrue(source.contains(".miuixDrawBackdrop("))
+        assertTrue(source.contains(".drawBackdrop("))
+        assertTrue(source.contains("miuixVibrancy()"))
+        assertTrue(source.contains("drawRect(topTabIndicatorCaptureSurfaceColor)"))
+        assertTrue(source.contains("resolveBottomBarDarkTheme(AppSurfaceTokens.background())"))
+        assertTrue(source.contains("resolveBottomBarIdleIndicatorSurfaceColor("))
         assertFalse(source.contains("indicatorHeight = 4.dp"))
     }
 
@@ -169,7 +179,7 @@ class TopTabRefractionPolicyTest {
             position = 1.32f,
             velocity = 860f,
             isDragging = true,
-            motionSpec = resolveBottomBarMotionSpec(BottomBarMotionProfile.IOS_FLOATING)
+            motionSpec = resolveBottomBarMotionSpec(BottomBarMotionProfile.ANDROID_NATIVE_FLOATING)
         )
 
         assertEquals(1f, top.lensAmountScale, 0.001f)
@@ -182,7 +192,7 @@ class TopTabRefractionPolicyTest {
     }
 
     @Test
-    fun `top tab indicator uses bottom bar stretch ratio while sliding`() {
+    fun `top tab indicator reuses bottom bar stretch transform while sliding`() {
         val transform = resolveTopTabIndicatorLayerTransform(
             motionProgress = 1f,
             velocityItemsPerSecond = 0f,
@@ -196,16 +206,13 @@ class TopTabRefractionPolicyTest {
 
         assertEquals(bottom.scaleX, transform.scaleX, 0.001f)
         assertEquals(bottom.scaleY, transform.scaleY, 0.001f)
-        assertEquals(88f / 56f, transform.scaleX, 0.001f)
-        assertEquals(88f / 56f, transform.scaleY, 0.001f)
     }
 
     @Test
-    fun `pager sliding uses velocity deformation without drag enlargement`() {
+    fun `pager sliding keeps bottom bar drag enlargement`() {
         assertEquals(
-            0f,
+            0.2f,
             resolveTopTabIndicatorScaleProgress(
-                pagerSliding = true,
                 dragScaleProgress = 0.2f,
                 pressProgress = 0f
             ),
@@ -221,9 +228,42 @@ class TopTabRefractionPolicyTest {
         assertEquals(
             0.6f,
             resolveTopTabIndicatorScaleProgress(
-                pagerSliding = false,
                 dragScaleProgress = 0.2f,
                 pressProgress = 0.6f
+            ),
+            0.001f
+        )
+    }
+
+    @Test
+    fun `pager sliding applies bottom bar panel offset in both directions`() {
+        assertEquals(
+            3.2f,
+            resolveTopTabMatchedPanelOffsetPx(
+                dragPanelOffsetPx = 0f,
+                pagerPanelOffsetFraction = 0.8f,
+                maxOffsetPx = 4f,
+                dragActive = false
+            ),
+            0.001f
+        )
+        assertEquals(
+            -2f,
+            resolveTopTabMatchedPanelOffsetPx(
+                dragPanelOffsetPx = 0f,
+                pagerPanelOffsetFraction = -0.5f,
+                maxOffsetPx = 4f,
+                dragActive = false
+            ),
+            0.001f
+        )
+        assertEquals(
+            1.25f,
+            resolveTopTabMatchedPanelOffsetPx(
+                dragPanelOffsetPx = 1.25f,
+                pagerPanelOffsetFraction = -0.5f,
+                maxOffsetPx = 4f,
+                dragActive = true
             ),
             0.001f
         )
@@ -289,7 +329,7 @@ class TopTabRefractionPolicyTest {
             )
         )
 
-        assertFalse(idle.useCombinedBackdrop)
+        assertTrue(idle.useCombinedBackdrop)
         assertTrue(idle.useIndicatorBackdrop)
         assertTrue(moving.useCombinedBackdrop)
         assertTrue(moving.useIndicatorBackdrop)
@@ -362,15 +402,19 @@ class TopTabRefractionPolicyTest {
         assertTrue(source.contains("resolveTopTabIndicatorRenderPosition("))
         assertTrue(source.contains("pagerCurrentPageOffsetFraction = pagerState?.currentPageOffsetFraction"))
         assertTrue(source.contains("resolveTopTabClickAction(index, selectedIndex)"))
-        assertTrue(source.contains("KernelSuBottomBarIndicatorLayer("))
+        assertTrue(source.contains("BottomBarMatchedLiquidIndicator("))
         assertFalse(source.contains("BottomBarLiquidIndicatorSurface("))
-        assertFalse(source.contains("LiquidIndicator("))
+        assertFalse(Regex("""(?m)^\s*LiquidIndicator\(""").containsMatchIn(source))
         assertFalse(source.contains("SimpleLiquidIndicator("))
         assertFalse(source.contains("BottomBarStyleIndicatorSurface("))
-        assertFalse(source.contains("drawBackdrop("))
+        assertTrue(source.contains(".miuixDrawBackdrop("))
+        assertTrue(source.contains(".drawBackdrop("))
         assertFalse(source.contains(".layerBackdrop(tabsBackdrop)"))
         assertFalse(source.contains("rememberCombinedBackdrop(backdrop, tabsBackdrop)"))
-        assertTrue(source.contains("rememberCombinedBackdrop(backdrop, topTabContentBackdrop)"))
+        assertFalse(source.contains("rememberCombinedBackdrop(backdrop, topTabContentBackdrop)"))
+        assertTrue(source.contains("rememberMiuixCombinedBackdrop(miuixBackdrop, topTabMiuixContentBackdrop)"))
+        assertTrue(source.contains("contentBackdrop = effectiveTopTabMiuixContentBackdrop"))
+        assertTrue(source.contains("backdrop = topTabIndicatorMiuixBackdrop"))
         assertTrue(source.contains("if (shouldPrimeTopTabLiquidGlassCapture)"))
         assertTrue(source.contains("layerBackdrop(topTabContentBackdrop)"))
     }

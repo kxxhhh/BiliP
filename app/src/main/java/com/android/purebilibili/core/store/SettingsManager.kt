@@ -1270,6 +1270,9 @@ object SettingsManager {
     private val KEY_CARD_TRANSITION_ENABLED = booleanPreferencesKey("card_transition_enabled")
     private val KEY_VIDEO_TRANSITION_REALTIME_BLUR_ENABLED =
         booleanPreferencesKey("video_transition_realtime_blur_enabled")
+    /** 预测性返回 / 返回 morph 是否预览实时画面（LIVE_SURFACE）。关闭后封面+标题整体落位。 */
+    private val KEY_VIDEO_TRANSITION_LIVE_RETURN_PREVIEW_ENABLED =
+        booleanPreferencesKey("video_transition_live_return_preview_enabled")
     private val KEY_VIDEO_SHARED_TRANSITION_SPEED =
         intPreferencesKey("video_shared_transition_speed")
     private val KEY_VIDEO_SHARED_TRANSITION_CUSTOM_DURATION_MILLIS =
@@ -1568,6 +1571,8 @@ object SettingsManager {
     // --- Auto Play on Enter (Click to Play) ---
     private val KEY_CLICK_TO_PLAY = booleanPreferencesKey("click_to_play")
     private val KEY_RESUME_PLAYBACK_PROMPT_ENABLED = booleanPreferencesKey("resume_playback_prompt_enabled")
+    private val KEY_SPACE_PLAYED_VIDEO_LOCATE_PROMPT_ENABLED =
+        booleanPreferencesKey("space_played_video_locate_prompt_enabled")
     private const val RESUME_PROMPT_CACHE_PREFS = "resume_prompt_cache"
     private const val CACHE_KEY_RESUME_PROMPT_ENABLED = "resume_prompt_enabled"
     private const val CACHE_KEY_RESUME_PROMPT_SHOWN = "resume_prompt_shown"
@@ -1610,6 +1615,16 @@ object SettingsManager {
     fun getResumePlaybackPromptEnabledSync(context: Context): Boolean {
         return context.getSharedPreferences(RESUME_PROMPT_CACHE_PREFS, Context.MODE_PRIVATE)
             .getBoolean(CACHE_KEY_RESUME_PROMPT_ENABLED, true)
+    }
+
+    fun getSpacePlayedVideoLocatePromptEnabled(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data
+            .map { preferences -> preferences[KEY_SPACE_PLAYED_VIDEO_LOCATE_PROMPT_ENABLED] ?: true }
+
+    suspend fun setSpacePlayedVideoLocatePromptEnabled(context: Context, enabled: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[KEY_SPACE_PLAYED_VIDEO_LOCATE_PROMPT_ENABLED] = enabled
+        }
     }
 
     fun hasResumePlaybackPromptShown(context: Context, promptKey: String): Boolean {
@@ -2524,6 +2539,22 @@ object SettingsManager {
     suspend fun setVideoTransitionRealtimeBlurEnabled(context: Context, value: Boolean) {
         context.settingsDataStore.edit { preferences ->
             preferences[KEY_VIDEO_TRANSITION_REALTIME_BLUR_ENABLED] = value
+        }
+    }
+
+    /**
+     * 预测性返回手势过程中是否预览实时画面。
+     * 默认开启（当前一镜到底 live morph）；关闭后走封面路径，封面与标题作为整体落位。
+     */
+    fun getVideoTransitionLiveReturnPreviewEnabled(context: Context): Flow<Boolean> =
+        context.settingsDataStore.data
+            .map { preferences ->
+                preferences[KEY_VIDEO_TRANSITION_LIVE_RETURN_PREVIEW_ENABLED] ?: true
+            }
+
+    suspend fun setVideoTransitionLiveReturnPreviewEnabled(context: Context, value: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[KEY_VIDEO_TRANSITION_LIVE_RETURN_PREVIEW_ENABLED] = value
         }
     }
 
@@ -6297,6 +6328,10 @@ object SettingsManager {
                 KEY_VIDEO_TRANSITION_REALTIME_BLUR_ENABLED,
                 SettingsShareSection.APPEARANCE
             ),
+            BooleanShareablePreferenceDefinition(
+                KEY_VIDEO_TRANSITION_LIVE_RETURN_PREVIEW_ENABLED,
+                SettingsShareSection.APPEARANCE
+            ),
             IntShareablePreferenceDefinition(KEY_VIDEO_SHARED_TRANSITION_SPEED, SettingsShareSection.APPEARANCE),
             IntShareablePreferenceDefinition(
                 KEY_VIDEO_SHARED_TRANSITION_CUSTOM_DURATION_MILLIS,
@@ -6328,6 +6363,10 @@ object SettingsManager {
             BooleanShareablePreferenceDefinition(KEY_VIDEO_INFO_DEFAULT_EXPANDED, SettingsShareSection.PLAYBACK),
             BooleanShareablePreferenceDefinition(KEY_CLICK_TO_PLAY, SettingsShareSection.PLAYBACK),
             BooleanShareablePreferenceDefinition(KEY_RESUME_PLAYBACK_PROMPT_ENABLED, SettingsShareSection.PLAYBACK),
+            BooleanShareablePreferenceDefinition(
+                KEY_SPACE_PLAYED_VIDEO_LOCATE_PROMPT_ENABLED,
+                SettingsShareSection.PLAYBACK
+            ),
             BooleanShareablePreferenceDefinition(KEY_AUTO_ROTATE_ENABLED, SettingsShareSection.PLAYBACK),
             IntShareablePreferenceDefinition(KEY_WIFI_QUALITY, SettingsShareSection.PLAYBACK),
             IntShareablePreferenceDefinition(KEY_MOBILE_QUALITY, SettingsShareSection.PLAYBACK),
