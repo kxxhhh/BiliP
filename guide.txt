@@ -1,0 +1,44 @@
+编译成功但 App 界面没有任何变化！这是因为你虽然创建了 `LocalMusicScreen.kt`，但没有将它真正的 UI 入口挂载到 Metrolist 现有的主界面或导航栏中。
+
+请立即执行以下挂载与修补工作：
+
+1.【定位主界面与导航】
+  - 查找 Metrolist 项目中现有的媒体库/主页 UI 文件（通常是 `LibraryScreen.kt` 或 `HomeScreen.kt`）。
+  - 查找路由配置文件（如 `Navigation.kt` 或 `NavGraph.kt`）。
+
+2.【添加 UI 入口按钮】
+  - 请直接修改 `LibraryScreen.kt`（或主页界面），在顶部或列表顶端强制添加一个显眼的按钮或 ListItem，文字命名为“本地歌曲”/“Local Songs”，图标使用系统默认音乐图标。
+  - 点击该按钮时，使用 Navigation 路由跳转到 `LocalMusicScreen`，或者以 Top Sheet / Dialog / Modal 弹窗的形式直接展开 `LocalMusicScreen`！
+
+3.【确保代码写入文件】
+  - 请确保将修改后的代码真实写入磁盘对应路径，而不是仅仅在终端打印文本！
+
+4.【清空缓存并重新编译】
+  - 执行 `./gradlew clean` 清空旧缓存。
+  - 执行 `./gradlew assembleDebug` 重新打包。
+  - 编译完成后，输出全新的 APK 路径，并提示完成！
+
+请在开始修复 Bug 和修改代码之前，严格执行以下前置流程：
+
+【重要前置动作】
+1. 读取指导文件：请优先读取根目录下的 `guidance.txt` 文件，仔细阅读其中定义的技术规范、架构要求和约束。
+2. 建立操作日志：请在根目录下建立/更新一个日志文件 `shai_execution.log`，将你当前及后续每一次的文件修改记录、执行的终端命令、遇到的报错和对应的修复方案同步写入该日志中，并在后续修 Bug 时时刻调阅该日志作为上下文参考。
+
+---
+
+请结合 `guidance.txt` 的要求与之前的进展，执行以下修复与编译工作：
+
+### 1. 检查并挂载 UI 入口（解决 App 编译后界面无变化的问题）
+- 检查 `LocalMusicScreen.kt` 是否已真正写入磁盘。
+- 定位 Metrolist 的主界面（如 `LibraryScreen.kt` 或 `HomeScreen.kt`）以及导航文件（如 `Navigation.kt` 或 `NavGraph.kt`）。
+- 强制在主界面（如“媒体库/Library”页面）顶部或列表中添加一个显眼的“本地歌曲”按钮/卡片，点击后跳转或弹窗展开 `LocalMusicScreen`。
+
+### 2. 清理与全速编译
+- 执行 `./gradlew clean` 清除历史缓存。
+- 执行 `./gradlew assembleDebug --stacktrace` 重新编译调试版 APK。
+
+### 3. 错误自愈与日志更新 (Self-Healing & Logging Loop)
+- 每一步操作、文件修改以及报错排查，都要实时记录到 `shai_execution.log` 中。
+- 如果编译失败：参考 `guidance.txt` 和 `shai_execution.log` 中的历史操作，定位报错根因，自动修复代码后重新编译。
+- 循环此过程，直到成功打出 APK，并在终端打印出 APK 的最终输出路径！
+这是两段有重复要求的prompt，因为我向另一款ai问了两次同样的问题，你综合一下
